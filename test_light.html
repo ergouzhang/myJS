@@ -4,12 +4,23 @@
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
+			info {
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
 		</style>
 	</head>
+	<div id="info">Description</div>
+
 	<body>
 		<script src="js/three.min.js"></script>
 		<script src = "https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 		<script>
+
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 			var mesh;
@@ -18,7 +29,7 @@
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
 			renderer.shadowMap.enabled = true;
-
+			
 			var geometry = new THREE.BoxGeometry( 24,32,32 );
 			var color = new THREE.Color("#7833aa");
 			material = new THREE.MeshPhongMaterial({ color: color.getHex()});
@@ -31,12 +42,24 @@
 			var textureLoader = new THREE.TextureLoader();
 			textureLoader.crossOrigin = true;
 			//异步加载
+			//先用白色替代，加载完之后再刷新
 			material.map =  textureLoader.load('img/carvedlimestoneground1_Base_Color.png')
 			material.needsUpdate = true 
+		
 
 				//法线贴图
-			material.normalMap = textureLoader.load('img/carvedlimestoneground1_Normal.png')
-			material.needsUpdate = true
+			var date = new Date()
+			date = date.getTime()
+			textureLoader.load('img/carvedlimestoneground1_Normal.png',function (texture) {
+				material.normalMap
+				material.needsUpdate = true
+
+				var date2 = new Date()
+				date2 = date2.getTime()
+
+				document.getElementById('info').innerHTML = date2 - date
+
+			})
 
 
 			var floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000), new THREE.MeshStandardMaterial({ color: 0x6ecccc }));
