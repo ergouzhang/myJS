@@ -1,0 +1,165 @@
+<html>
+	<head>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+        <script src="js/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+		<script>
+			    var colors = [0x05A8AA, 0xB8D5B8, 0xD7B49E, 0xDC602E, 0xBC412B, 0xF19C79, 0xCBDFBD, 0xF6F4D2, 0xD4E09B, 0xFFA8A9, 0xF786AA, 0xA14A76, 0xBC412B, 0x63A375, 0xD57A66, 0x731A33, 0xCBD2DC, 0xDBD48E, 0x5E5E5E, 0xDE89BE];
+                var scene, camera, renderer, geometry, mesh;
+
+                var verticePositions = [];
+
+                function initScene() {
+                    scene = new THREE.Scene();
+                    camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    renderer = new THREE.WebGLRenderer({ alpha: true });
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    document.body.appendChild(renderer.domElement);
+                    camera.position.z = 100;
+                };
+
+                function initLighting() {
+                    // so many lights
+                    var light = new THREE.DirectionalLight(0xffffff, 1);
+                    light.position.set(0, 1, 0);
+                    scene.add(light);
+
+                    var light = new THREE.DirectionalLight(0xffffff, 0.5);
+                    light.position.set(0, -1, 0);
+                    scene.add(light);
+
+                    var light = new THREE.DirectionalLight(0xffffff, 1);
+                    light.position.set(1, 0, 0);
+                    scene.add(light);
+
+                    var light = new THREE.DirectionalLight(0xffffff, 0.5);
+                    light.position.set(0, 0, 1);
+                    scene.add(light);
+                }
+
+                function initGeometry() {
+                    // add icosahedron
+                    geometry = new THREE.IcosahedronGeometry(20);
+                    for (var i = 0; i < geometry.faces.length; i++) {
+                        var face = geometry.faces[i];
+                        face.color.setHex(colors[i]);
+                    }
+
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors }));
+                    mesh.scale.x =  0.2 
+                    mesh.scale.y = 0.2
+                    mesh.scale.z = 0.2 
+                    scene.add(mesh);
+                }
+
+
+                function render(time) {
+                    requestAnimationFrame(render);
+                    renderer.render(scene, camera);
+                    geometry.verticesNeedUpdate = true;
+                };
+
+                function getOriginalVerticePositions() {
+                    for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+                        verticePositions.push({ x: geometry.vertices[i].x, y: geometry.vertices[i].y, z:geometry.vertices[i].z });
+                    }
+                }
+
+                function getNewVertices() {
+                    var newVertices = [];
+                    for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+                        newVertices[i] = {
+                            x: verticePositions[i].x - 5 + Math.random() * 10,
+                            y: verticePositions[i].y - 5 + Math.random() * 10,
+                            z: verticePositions[i].z - 5 + Math.random() * 10,
+                        }
+                    }
+                    return newVertices;
+                }
+
+                function tweenIcosohedron() {
+                    var rotation = { x: Math.random() * 3, y: Math.random() * 3, z: Math.random() * 3 };
+                    TweenLite.to(mesh.rotation, 1, {
+                        x: rotation.x, y: rotation.y, z: rotation.z,
+                        ease: Back.easeInOut, onComplete: tweenIcosohedron
+                    });
+                    var newVerticePositions = getNewVertices();
+                    for (var i = 0; i < geometry.vertices.length; i++) {
+                        tweenVertice(i, newVerticePositions);
+                    }
+                }
+
+                function tweenVertice(i, newVerticePositions) {
+                    TweenLite.to(geometry.vertices[i], 1, { x: newVerticePositions[i].x, y: newVerticePositions[i].y, z: newVerticePositions[i].z,ease: Back.easeInOut });
+                }
+
+                function resize() {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                }
+
+           
+
+                function convertTo3DCoordinate(clientX, clientY){
+                   var vector = new THREE.Vector3();
+
+                    vector.set(
+                        (clientX / window.innerWidth) * 2 - 1,
+                        - (clientY / window.innerHeight) * 2 + 1,
+                        0.1);
+
+                    vector.unproject(camera);
+                    var dir = vector.sub(camera.position).normalize();
+                    var distance = (28 - camera.position.z) / dir.z;
+                    var pos = camera.position.clone().add(dir.multiplyScalar(distance));
+                    return pos;
+                }
+
+                function onDocumentTouchStart2(event) {
+                    var pos  = convertTo3DCoordinate(event.clientX, event.clientY)
+                    mesh.position.x = pos.x
+                    mesh.position.y = pos.y
+                     console.log('pos is >>>>.' + pos.x + '.....' + pos.y)
+                }
+                function onDocumentTouchMove2(event) {
+                    var pos = convertTo3DCoordinate(event.clientX, event.clientY)
+                    mesh.position.x = pos.x
+                    mesh.position.y = pos.y
+                }
+
+                 function onDocumentTouchStart(event) {
+                        var pos = convertTo3DCoordinate(event.touches[0].pageX, event.touches[0].pageY)
+                     mesh.position.x = pos.x
+                     mesh.position.y = pos.y
+                    }
+
+                   function onDocumentTouchMove(event) {
+                        var pos = convertTo3DCoordinate(event.touches[0].pageX, event.touches[0].pageY)
+                        mesh.position.x = pos.x
+                        mesh.position.y = pos.y
+                    }
+
+
+                document.addEventListener('mousedown', onDocumentTouchStart2,false);
+                document.addEventListener('mousemove', onDocumentTouchMove2,false);
+                document.addEventListener('touchstart', onDocumentTouchStart,false);
+                document.addEventListener('touchmove', onDocumentTouchMove,false);
+
+                initScene();
+                initLighting();
+                initGeometry();
+                resize();
+                getOriginalVerticePositions();
+                render();
+                window.addEventListener("resize", resize);
+                tweenIcosohedron();
+		</script>
+	</body>
+</html>
