@@ -31,23 +31,13 @@
 			var textureLoader = new THREE.TextureLoader();
 			textureLoader.crossOrigin = true;
 			//异步加载
-			textureLoader.load('img/carvedlimestoneground1_Base_Color.png',function (texture) {
-				//纹理贴图
-				material.map = texture
-				/*material.needsUpdate需要每帧更新绘制
-				*类似的还有geometry.verticesNeedUpdate\elementsNeedUpdate\..
-				*mesh的属性无需update
-				*/
-				material.needsUpdate = true 
-				
-
-			})
+			material.map =  textureLoader.load('img/carvedlimestoneground1_Base_Color.png')
+			material.needsUpdate = true 
 
 				//法线贴图
-			textureLoader.load('img/carvedlimestoneground1_Normal.png', function (texture) {
-				material.normalMap = texture
-				material.needsUpdate = true
-			})
+			material.normalMap = textureLoader.load('img/carvedlimestoneground1_Normal.png')
+			material.needsUpdate = true
+
 
 			var floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000), new THREE.MeshStandardMaterial({ color: 0x6ecccc }));
 				floor.rotation.x = -Math.PI / 2;
