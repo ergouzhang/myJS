@@ -14,9 +14,10 @@
 			}
 		</style>
 	</head>
-	<info id = "info" type = "text" size = 20 >Description</info>
 
 	<body>
+		<info id="info" type="text" size=2 0> Description</ info>
+		
 		<script src="js/three.min.js"></script>
 		<script src = "https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 		<script src="js/gui.js"></script>
@@ -49,8 +50,7 @@
 			var text = new fText();
 			var gui = new dat.GUI();
 			gui.add(text, 'message');
-			gui.add(text, 'speed', -5, 5);
-			gui.add(text, 'displayOutline');
+			gui.add(text, 'speed', 0, 0.1);
 
 			//输入监听
 			function onDocumentKeyDown(event)
@@ -77,7 +77,7 @@
 			var date = new Date()
 			date = date.getTime()
 			textureLoader.load('img/carvedlimestoneground1_Normal.png',function (texture) {
-				material.normalMap
+				material.normalMap = texture
 				material.needsUpdate = true
 
 				var date2 = new Date()
@@ -96,8 +96,9 @@
 
 			var render = function () {
 					requestAnimationFrame(render);
-					mesh.rotation.x += 0.01;
+					mesh.rotation.x += text.speed;
 					renderer.render(scene, camera);
+		
 				};
 		
             var controls = new THREE.OrbitControls(camera, renderer.domElement);
