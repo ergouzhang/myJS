@@ -3,7 +3,7 @@
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
+			
 			info {
 				position: absolute;
 				top: 10px;
@@ -14,11 +14,12 @@
 			}
 		</style>
 	</head>
-	<div id="info">Description</div>
+	<info id = "info" type = "text" size = 20 >Description</info>
 
 	<body>
 		<script src="js/three.min.js"></script>
 		<script src = "https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+		<script src="js/gui.js"></script>
 		<script>
 
 			var scene = new THREE.Scene();
@@ -37,6 +38,31 @@
 			mesh.rotation.y = 20
 			mesh.castShadow = true
 			scene.add(mesh)
+
+				//gui
+			var fText = function () {
+				this.message = 'dat.gui'
+				this.speed = 0.8
+				this.displayOutline = false
+
+			}
+			var text = new fText();
+			var gui = new dat.GUI();
+			gui.add(text, 'message');
+			gui.add(text, 'speed', -5, 5);
+			gui.add(text, 'displayOutline');
+
+			//输入监听
+			function onDocumentKeyDown(event)
+			{
+				if (event.keyCode == 13) {
+					document.getElementById('info').innerHTML = text.message
+
+				}
+
+			}
+			document.addEventListener('keydown', onDocumentKeyDown);
+
 
 			THREE.ImageUtils.crossOrigin = true;
 			var textureLoader = new THREE.TextureLoader();
