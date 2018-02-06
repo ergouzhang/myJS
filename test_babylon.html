@@ -28,51 +28,70 @@
         var engine = new BABYLON.Engine(canvas,true);
         var createScene = function () {
             var scene = new BABYLON.Scene(engine);
-           // scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+            var camera = new BABYLON.ArcRotateCamera("camera",1,0.8,70,new BABYLON.Vector3(5,0,0),scene);
+            camera.attachControl(canvas,true)
+
+            var matPlan = new BABYLON.StandardMaterial("matPlan1",scene);
+            matPlan.backFaceCulling = false;
+            matPlan.emissiveColor = new BABYLON.Color3(0.2,1,0.2);
+
+            var matBB = new BABYLON.StandardMaterial("matBB",scene);
+            matBB.emissiveColor = new BABYLON.Color3(1,1,1)
+            matBB.wireframe = true;
+
+            var plane1 = BABYLON.Mesh.CreatePlane("plane1",20,scene);
+            plane1.position = new BABYLON.Vector3(13,0,0);
+            plane1.rotation.x = -Math.PI/4;
+            plane1.material = matPlan;
+
+            var plane2 = BABYLON.Mesh.CreatePlane("plane2",20,scene);
+            plane2.position = new BABYLON.Vector3(-13,0,0);
+            plane2.rotation.x = -Math.PI / 4;
+            plane2.material = matPlan;
+
+            var planAABB = BABYLON.Mesh.CreateBox("AABB",20,scene);
+            planAABB.material = matBB;
+            planAABB.position = new BABYLON.Vector3(13,0,0,);
+            planAABB.scaling = new BABYLON.Vector3(1, Math.cos(Math.PI / 4), Math.cos(Math.PI / 4));
             
-            // Parameters : name, position, scene
-            var camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -10), scene);
+            var planOBB = BABYLON.Mesh.CreateBox("OBB",20,scene);
+            planOBB.material = matBB;
+            planOBB.scaling = new BABYLON.Vector3(1,1,0.05);
+            planOBB.parent = plane2;
 
-            // Targets the camera to a particular position. In this case the scene origin
-            camera.setTarget(BABYLON.Vector3.Zero());
+            var balloon1 = BABYLON.Mesh.CreateSphere("balloon1",10,2.0,scene);
+            var balloon2 = BABYLON.Mesh.CreateSphere("balloon2", 10, 2.0, scene);
+            balloon1.material = new BABYLON.StandardMaterial("matBallon",scene);
+            balloon2.material = new BABYLON.StandardMaterial("matBallon",scene);
+            balloon1.position = new BABYLON.Vector3(6, 5, 0);
+            balloon2.position = new BABYLON.Vector3(-6, 5, 0);
 
-            // Attach the camera to the canvas
-            camera.attachControl(canvas, true);
-            var light1 = new BABYLON.HemisphericLight("light1",new BABYLON.Vector3(1,1,0),scene)
-            var light2 = new BABYLON.PointLight("light2",new BABYLON.Vector3(0,1,-1),scene)
-            light2.diffuse = new BABYLON.Color3(1, 0, 0);
-            light2.specular = new BABYLON.Color3(0, 1, 0);
-            light2.groundColor = new BABYLON.Color3(0, 1, 0);
+            var alpha = Math.PI
 
-            var sphere = BABYLON.MeshBuilder.CreateSphere("sphere",{diameter:2},scene)
-            var myMaterial = new BABYLON.StandardMaterial("myMaterial",scene)
-            myMaterial.diffuseColor = new BABYLON.Color3(1, 0, 1);
-            myMaterial.specularColor = new BABYLON.Color3(0.5, 0.6, 0.87);
-           // myMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-            myMaterial.ambientColor = new BABYLON.Color3(0.23, 0.98, 0.53);
-            sphere.material = myMaterial;
+            scene.registerBeforeRender(function () {
+                if (balloon1.intersectsMesh(plane1, false)) {
+                    balloon1.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
+                } else {
+                    balloon1.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+                }
 
-            //ANIMATION
-            var animationBox = new BABYLON.Animation("myAni","scaling.x",30,BABYLON.Animation.ANIMATIONTYPE_FLOAT,BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE)
-            var keys = [];
-            keys.push({frame:0, value:1})
-            keys.push({ frame: 20, value: 0.2 })
-            keys.push({ frame: 200, value: 1 })
-            animationBox.setKeys(keys)
-            sphere.animations = []
-            sphere.animations.push(animationBox)
+                //Balloon 2 intersection -- Precise = true
+                if (balloon2.intersectsMesh(plane2, true)) {
+                    balloon2.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
+                } else {
+                    balloon2.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+                }
+
+                alpha += 0.01;
+                balloon1.position.y += Math.cos(alpha)/10;
+                balloon2.position.y = balloon1.position.y;
+            })
+
+            
 
 
-             var animationBox2 = new BABYLON.Animation("myAni2", "position.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE)
-            var keys2 = [];
-            keys2.push({ frame: 0, value: 0 })
-            keys2.push({ frame: 20, value: 2})
-            keys2.push({ frame: 100, value: 6 })
-            animationBox2.setKeys(keys2)
-            sphere.animations.push(animationBox2)
 
-            scene.beginAnimation(sphere,0,200,true)
-
+    
 
             return scene
         }
