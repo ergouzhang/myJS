@@ -1,0 +1,26 @@
+{
+   "/Nr5bK7OvaKLEoZLA2iWeJWxLlQmxzROzAB7sLdm4fA=": {
+      "dynamic_spki_hashes_expiry": 0.0,
+      "expect_ct": {
+         "expect_ct_enforce": false,
+         "expect_ct_expiry": 1521197741.24701,
+         "expect_ct_observed": 1520592941.24701,
+         "expect_ct_report_uri": "https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      },
+      "expiry": 0.0,
+      "mode": "default",
+      "pkp_include_subdomains": false,
+      "pkp_observed": 0.0,
+      "sts_include_subdomains": false,
+      "sts_observed": 0.0
+   },
+   "Ifty0kmGtBkqpzyRNEJ2iccvLpOffAEtEf72UjNCr0U=": {
+      "dynamic_spki_hashes_expiry": 0.0,
+      "expiry": 1552180812.665541,
+      "mode": "force-https",
+      "pkp_include_subdomains": false,
+      "pkp_observed": 0.0,
+      "sts_include_subdomains": true,
+      "sts_observed": 1520644812.666614
+   }
+}
