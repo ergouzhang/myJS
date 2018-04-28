@@ -6,4 +6,5 @@
     }
     
     let syncData:any[] =[]
+    let userInfo = {}
 // }

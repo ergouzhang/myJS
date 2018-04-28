@@ -22,7 +22,7 @@ var netWork = /** @class */ (function () {
                 console.log("get gate error >>>>");
             }
         };
-        xhr.open('GET', 'http://139.199.25.194/gate?uniqueId=1231', true);
+        xhr.open('GET', 'http://172.16.107.21:11015/gate?uniqueId=1231', true);
         xhr.send();
     };
     netWork.prototype.login = function (callBack) {
@@ -34,11 +34,13 @@ var netWork = /** @class */ (function () {
             connectTimeout: 10 * 1000,
             maxReconnectAttempts: 1000,
             reconnect: true
-        }, function () {
+        }, function (res) {
             console.log('socket>>>>>>>connect ');
+            console.log(res);
             var testData = {};
-            testData['token'] = 123; //Math.round(Math.random()*100)
-            testData['uniqueId'] = 321; //Math.round(Math.random()*100)
+            testData['token'] = Math.round(Math.random() * 100); //123//Math.round(Math.random()*100)
+            testData['uniqueId'] = Math.round(Math.random() * 100); //1//Math.round(Math.random()*100)
+            userInfo['userId'] = testData['uniqueId'];
             testData['serverId'] = 1;
             pomelo.request('connector.entryHandler.enter', encodeURIComponent(JSON.stringify(testData)), function (res) {
                 if (res.errno != 0) {
@@ -54,21 +56,28 @@ var netWork = /** @class */ (function () {
     netWork.prototype.setupMessageListener = function () {
         var self = this;
         console.log("setupMessage>>>>");
-        pomelo.on('serverMessage', function (data) {
+        pomelo.on('tableMessage', function (data) {
             switch (data.route) {
-                case 'broadcast':
-                    break;
                 case 'notify':
                     break;
                 case 'shutdown':
                     pomelo.disconnect();
                     break;
                 case 'syncFrame':
-                    if (data.frames.length == 0) {
-                        data.frames = ['sync'];
+                    // for(let x in data){
+                    //     console.log("syncFrame>>>>>>" + x )
+                    //     console.log("syncFrame>>>>>>2"+ data[x] )
+                    // }
+                    //  for(let x in data.operations){
+                    //     console.log("syncFrame>>>>>>" + x )
+                    //     for (let y in data.operations[x]) {
+                    //         console.log("syncFrame>>>>>>2"+ data.operations[x][y] )
+                    //     }
+                    // }
+                    if (data.operations && data.operations != {}) {
+                        syncData.push(data.operations);
                     }
-                    console.log("sync Frame>>>>>>>" + data.frames);
-                    syncData.push(data.frames);
+                    // console.log("serverMessage>>>>" + data.frames)
                     break;
             }
         });
@@ -85,10 +94,10 @@ var netWork = /** @class */ (function () {
         }
         pomelo.request(route, msg, function (res) {
             if (res.errno != 0) {
-                console.log(res.errmsg);
+                console.log('send error' + res.errno);
                 return;
             }
-            console.log('socket>>>>>>>request response is');
+            console.log('socket>>>>>>>request response ok');
         });
     };
     return netWork;

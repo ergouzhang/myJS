@@ -5,5 +5,6 @@ function handler(obj, method) {
     };
 }
 var syncData = [];
+var userInfo = {};
 // }
 //# sourceMappingURL=utilTools.js.map

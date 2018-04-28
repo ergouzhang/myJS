@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html>
-
+<!--ide生成head配置-->
 <head>
 	<meta charset='utf-8' />
 	<title>www.layabox.com</title>
@@ -18,35 +18,25 @@
 </head>
 
 <body>
-	<!--以下引用了常用类库，如果不使用，可以删除-->
-
-	<!--核心包，封装了显示对象渲染，事件，时间管理，时间轴动画，缓动，消息交互,socket，本地存储，鼠标触摸，声音，加载，颜色滤镜，位图字体等-->
+	<!-- laya引擎库引入 -->
+	<!--TIPS: 在此文件引入的代码相当于都在同一文件里，所以假设在某个js直接定义一个变量并引入，之后引入的js都可以访问此变量，例如uitlTools.js -->
 	<script type="text/javascript" src="libs/laya.core.js"></script>
-	<!--提供了微信小游戏的适配-->
 	<script type="text/javascript" src="libs/laya.wxmini.js"></script>
-	<!--封装了webgl渲染管线，如果使用webgl渲染，可以在初始化时调用Laya.init(1000,800,laya.webgl.WebGL);-->
     <script type="text/javascript" src="libs/laya.webgl.js"></script>
-	<!--是动画模块，包含了swf动画，骨骼动画等-->
     <script type="text/javascript" src="libs/laya.ani.js"></script>
-	<!--包含更多webgl滤镜，比如外发光，阴影，模糊以及更多-->
     <script type="text/javascript" src="libs/laya.filter.js"></script>
-	<!--封装了html动态排版功能-->
     <script type="text/javascript" src="libs/laya.html.js"></script>
-	<!--粒子类库-->
     <script type="text/javascript" src="libs/laya.particle.js"></script>
-	<!--提供tileMap解析支持-->
     <script type="text/javascript" src="libs/laya.tiledmap.js"></script>
-	<!--提供了制作UI的各种组件实现-->
     <script type="text/javascript" src="libs/laya.ui.js"></script>
-    <!--提供LayaAir3D接口-->
-	<script type="text/javascript" src="libs/laya.d3.js"></script>
-	<!-- 物理引擎matter.js -->
+	<script type="text/javascript" src="libs/laya.d3.js"></script><!--TIPS:使用3d必须引入此库 -->
+	
 	<!--用户自定义顺序文件添加到这里-->
 	<!--jsfile--Custom-->
 	<script src="../src/utils/pomelo-creator-client.js"></script>
 	<!--jsfile--Custom-->
 	<!--自定义的js(src文件夹下)文件自动添加到下面jsfile模块标签里面里-->
-	<!--删除标签，ide不会自动添加js文件，请谨慎操作-->
+	<!--TIPS:src文件夹下的ts文件会被自动添加到这里，可以手动调整引入顺序-->
 	<!--jsfile--startTag-->
 	<script src="js/utils/utilTools.js"></script>
 	<script src="js/utils/netWork.js"></script>
@@ -57,6 +47,7 @@
 	<!--jsfile--endTag-->
 
 	<!--启动类添加到这里-->
+	<!--TIPS:代码入口在这里~~，打开layasample.ts继续-->
 	<!--jsfile--Main-->
 	<script src="js/LayaSample.js"></script>
 	<!--jsfile--Main-->

@@ -3,12 +3,12 @@
  */
     class frameSync{
         private static _Instance:frameSync;
-        private frameBufferSize:number = 3;
+        private frameBufferSize:number = 2;
         private stepTime:number = 100;
         private isBufferFull:boolean = false;
         private syncInterFuncId:any = undefined;
-        private syncState:string = "pause";
-        private targets:any[] = [];
+        private syncState = {};
+        private targets = {};
 
         constructor(){
             console.log("frameSyncManger constructor>>>>"+ syncData.length)
@@ -21,12 +21,14 @@
             return frameSync._Instance;
         }
         
-        public startSync():void{
+        public startSync(num):void{
             if (this.syncInterFuncId) {
                 return 
             }
             syncData = [];
-            this.syncState = "pause";            
+            for (let uid in this.targets) {
+                this.targets[uid]['frameState'] = "pause";
+            }
             this.syncInterFuncId = setInterval(handler(this,this.interFunc),this.stepTime);
         }
 
@@ -45,150 +47,177 @@
             //非缓帧消息里只有一个
             if (notBufferSize == 1 ) {
                 let frameData = syncData.splice(0,notBufferSize);
-                if (frameData[0] == "sync") {
-                    console.log("frameSync>>>>> sync");
-                    this.setSyncState(frameData);
+                for (let uid in frameData) {
+                    console.log("frameSync>>>>>>>"+ uid)
+                    console.log("frameSyncData>>>>>>>"+frameData[uid].data)
+                    if (typeof(frameData[uid].data) == 'undefined' ) {
+                        this.setSyncState({},uid);
+                    }
+                    else{
+                        this.setRunState(frameData[uid].data,uid)
+                    }
                 }
-                else {
-                    console.log("frameSync>>>> run")
-                    this.setRunState(frameData);
-                }
+
+                
+                // for (let index = 0; index < frameData.length; index++) {
+                //     let element = frameData[index];
+                //     if (element == "sync") {
+                //         console.log("frameSync>>>>> sync");
+                //         this.setSyncState(element,index);
+                //      }
+                //     else {
+                //         console.log("frameSync>>>> run")
+                //         this.setRunState(element,index);
+                //     }
+                // }
+
             }
             //非缓存帧消息里大于一个，需要加速
             else if (notBufferSize > 1 ){
                 let frameData = syncData.splice(0,notBufferSize);
                 console.log("frameSync>>>>> acc")
-                this.setAccState(frameData)
+                for (let index = 0; index < frameData.length; index++) {
+                    var element = frameData[index];
+                    this.setAccState(element,index)
+                }
             }
 
             //卡了，没收到非缓存帧消息，且缓存帧没用完
             else if (notBufferSize < 1 && (notBufferSize>(0- this.frameBufferSize))){
                 let frameData = syncData.splice(0,1);
-                if (frameData[0] == "sync") {
-                    console.log('frameSync>>>>> buffer sync ')
-                    this.setSyncState(frameData)
-                }else {
-                    console.log('frameSync>>>>> buffer run ')
-                    this.setRunState(frameData)
+
+                for (let index = 0; index < frameData.length; index++) {
+                    let element = frameData[index];
+                     if (element == "sync") {
+                        console.log('frameSync>>>>> buffer sync ')
+                        this.setSyncState(element,index)
+                    }else {
+                        console.log('frameSync>>>>> buffer run ')
+                        this.setRunState(element,index)
+                    }
                 }
+               
             }
 
             // 缓存帧也用完了
             else {
-                console.log('frameSync>>>>> pause')
-                this.setPauseState()
+                for (let index = 0; index < this.targets.length; index++) {
+                    console.log('frameSync>>>>> pause')
+                    this.setPauseState(index)
+                }
+                
             }
         }
 
-        public setRunState(syncFrames):void {
-            switch (this.syncState) {
+        public setRunState(syncFrames,index):void {
+            switch (this.syncState[index]) {
                 case "run":
-                    this.syncState = "run";
-                    this.runAction(syncFrames);
+                    this.syncState[index] = "run";
+                    this.runAction(syncFrames,index);
                     break;
                 case "pause":
-                    this.syncState = "run";
-                    this.resumeAction();
-                    this.runAction(syncFrames);
+                    this.syncState[index] = "run";
+                    this.resumeAction(index);
+                    this.runAction(syncFrames,index);
                     break;
                 case "sync":
-                    this.syncState = "run"
-                    this.runAction(syncFrames);
+                    this.syncState[index] = "run"
+                    this.runAction(syncFrames,index);
                     break;
                 default:
                     break;
             }
         }
 
-        public setSyncState(syncFrames):void {
-            switch (this.syncState) {
+        public setSyncState(syncFrames,index):void {
+            switch (this.syncState[index]) {
                 case "run":
-                    this.syncState = "sync";
+                    this.syncState[index] = "sync";
                     break;
                 case "pause":
-                    this.syncState = "sync";
-                    this.resumeAction();
+                    this.syncState[index] = "sync";
+                    this.resumeAction(index);
                     break;
                 case "sync":
-                    this.syncState = "sync"
+                    this.syncState[index] = "sync"
                     break;
                 default:
                     break;
             }
         }
 
-        public setPauseState():void {
-            switch (this.syncState) {
+        public setPauseState(index):void {
+            switch (this.syncState[index]) {
                 case "run":
-                    this.syncState = "pause";
-                    this.pauseAction()
+                    this.syncState[index] = "pause";
+                    this.pauseAction(index)
                     break;
                 case "pause":
-                    this.syncState = "pause";
-                    this.pauseAction()
+                    this.syncState[index] = "pause";
+                    this.pauseAction(index)
                     break;
                 case "sync":
-                    this.syncState = "pause"
-                    this.pauseAction()
+                    this.syncState[index] = "pause"
+                    this.pauseAction(index)
                     break;
                 default:
                     break;
             }
         }
 
-        public setAccState(syncFrames):void {
-            switch (this.syncState) {
+        public setAccState(syncFrames,index):void {
+            switch (this.syncState[index]) {
                 case "run":
-                    this.accAction(syncFrames)
+                    this.accAction(syncFrames,index)
                     break;
                 case "pause":
-                    this.resumeAction()
-                    this.accAction(syncFrames)
+                    this.resumeAction(index)
+                    this.accAction(syncFrames,index)
                     break;
                 case "sync":
-                    this.accAction(syncFrames)
+                    this.accAction(syncFrames,index)
                     break;
                 default:
                     break;
             }
-            this.syncState = "pause";
+            this.syncState[index] = "pause";
         }
         
 
-        public pauseAction(){
+        public pauseAction(targetIndex){
             for (let index = 0; index < this.targets.length; index++) {
                 const target = this.targets[index]
-                if (target.onPause) {
-                target.onPause()
+                if (index == targetIndex && target.getComponentByType(newSnake).onStatePause) {
+                 target.getComponentByType(newSnake).onStatePause()
                 }
             }
         }
 
-        public resumeAction(){
+        public resumeAction(targetIndex){
             for (let index = 0; index < this.targets.length; index++) {
                 const target = this.targets[index]
-                if (target.onResume) {
-                target.onResume()
+                if (index == targetIndex && target.getComponentByType(newSnake).onStateResume) {
+                target.getComponentByType(newSnake).onStateResume()
                 }
             }
         }
 
         // 加速执行
-        public accAction(syncData) {
+        public accAction(syncData,targetIndex) {
             for (let index = 0; index < this.targets.length; index++) {
                 const target = this.targets[index]
-                if (target.onAcc) {
-                target.onAcc(syncData)
+                if (index == targetIndex && target.getComponentByType(newSnake).onStateAcc) {
+                target.getComponentByType(newSnake).onStateAcc(syncData)
                 }
             }
         }
 
         // 执行step内的所有动作
-        public runAction (syncDatas) {
+        public runAction (syncDatas,targetIndex) {
             for (let index = 0; index < this.targets.length; index++) {
                 const target = this.targets[index]
-                if (target.onRun) {
-                target.onRun(syncDatas)
+                if (index == targetIndex && target.getComponentByType(newSnake).onStateRun) {
+                target.getComponentByType(newSnake).onStateRun(syncDatas)
                 }
             }
         }
@@ -200,15 +229,19 @@
             this.syncInterFuncId = undefined;
         }
 
-        public registerTarget(target:any){
+        public registerTarget(target:any,uid:string){
             if (! target) {
                 console.log("frameSync>>>>>>>>> registerTarget error !")
                 return
             }
             if (!this.targets) {
-                this.targets = [];
+                this.targets = {};
             }
-            this.targets.push(target);
+            this.targets[uid]  = target;
+        }
+
+        public removeTarget(target){
+            
         }
 
        
