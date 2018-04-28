@@ -1,4 +1,4 @@
-test1 >>>>>>>>>>
+test1 >>>>>>>>>>master
 test2>>>>>>
 *LayaBox是一个h5游戏引擎，包含3d+VR功能，web端3d性能测试号称超过unity。
 *mac端只需要下载layaIDE即可，无需环境配置。
